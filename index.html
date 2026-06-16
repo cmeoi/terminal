@@ -3,43 +3,7 @@
    CME OI TERMINAL — PHP Cache + Premium UI  (2-Day Edition)
    By Imtiaz Ali
 ============================================================ */
-define('CACHE_FILE',    __DIR__ . '/cme_cache.json');
-define('CACHE_SECONDS', 300);
 
-if(isset($_GET['api'])){
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Origin: *');
-    header('Cache-Control: no-store');
-
-    if($_GET['api']==='save'){
-        $raw=file_get_contents('php://input');
-        if(!$raw){echo json_encode(['status'=>'error']);exit;}
-        $d=json_decode($raw,true);
-        if(!$d){echo json_encode(['status'=>'error']);exit;}
-        $d['fetchedAt']=date('Y-m-d H:i:s');
-        $d['fetchedTs']=time();
-        file_put_contents(CACHE_FILE,json_encode($d),LOCK_EX);
-        echo json_encode(['status'=>'ok']);
-        exit;
-    }
-
-    if($_GET['api']==='data'){
-        if(!file_exists(CACHE_FILE)){
-            echo json_encode(['status'=>'empty','data'=>null,'needsRefresh'=>true]);
-            exit;
-        }
-        $raw=file_get_contents(CACHE_FILE);
-        $d=json_decode($raw,true);
-        $age=time()-($d['fetchedTs']??0);
-        echo json_encode([
-            'status'=>'ok','data'=>$d,
-            'cacheAge'=>$age,'needsRefresh'=>$age>=CACHE_SECONDS
-        ]);
-        exit;
-    }
-    echo json_encode(['status'=>'error']);
-    exit;
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
